@@ -46,7 +46,7 @@ repos:
   - id: mypy
     name: mypy
     language: python
-    language_version: python 3.10
+    language_version: python 3.11
     types: [python]
     require_serial: true
     verbose: true
@@ -60,7 +60,7 @@ repos:
   rev: v3.21.2
   hooks:
   - args:
-    - --py310-plus
+    - --py311-plus
     id: pyupgrade
 
 # - repo: https://github.com/commitizen-tools/commitizen
@@ -109,14 +109,16 @@ repos:
   # S311 Standard pseudo-random generators are not suitable for security/cryptographic purposes
   #
   # RUF001 ambiguous characters (for maps.py)
+  # RUF002 ambiguous characters in docstring
+  # RUF003 ambiguous characters in docstring
   rev: 'v0.15.12'
   hooks:
     - id: ruff
       exclude: "tests"
       args:
-      - --target-version=py310
+      - --target-version=py311
       - --select=ALL
-      - --ignore=COM812,D203,D213,ISC003,FLY,S311,RUF001
+      - --ignore=COM812,D203,D213,ISC003,FLY,S311,RUF001,RUF002,RUF003
       - --fix
       - --fixable=RUF022
     - id: ruff
