@@ -85,6 +85,7 @@ ignore = [
     "B019", # memory leak warning for lru_cache
     "D4",   # first line should end with a period, etc.
     "RUF001", # ambiguous symbols
+    "RUF002", # ambiguous symbols
 ]
 
 
