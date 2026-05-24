@@ -200,7 +200,6 @@ _DICTS: list[dict[str, str]] = [
 ]
 NORMAL_MAP = {v: k for d in _DICTS for k, v in d.items()}
 
-
 def _to_map(mapping: dict[str, str], text: str) -> str:
     """Convert text to a specific format using the provided mapping."""
     parts = (mapping.get(c, c) for c in regex.findall(r"\X", text))
