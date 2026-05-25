@@ -50,34 +50,32 @@ class TestCountChars:
 class TestSplitAtChars:
     """Split a string at whitespace or punctuation, no later than max_chars.
 
-    The function returns ``(rest, head)`` — the first element is what
-    remains after the split, the second is the chunk up to and including
-    the split character.
+    The function returns ``(head, rest)`` — the first element is the chunk
+    up to and including the split character, the second is everything after.
     """
 
     def test_splits_at_latest_space(self):
-        rest, head = split_at_chars("hello world foo", 12)
+        head, rest = split_at_chars("hello world foo", 12)
         assert head == "hello world "
         assert rest == "foo"
 
     def test_splits_at_punctuation(self):
-        rest, head = split_at_chars("hello,world,foo", 12)
+        head, rest = split_at_chars("hello,world,foo", 12)
         assert head == "hello,world,"
         assert rest == "foo"
 
     def test_picks_highest_valid_breakpoint(self):
-        rest, head = split_at_chars("a b c d e f g h i", 8)
+        head, rest = split_at_chars("a b c d e f g h i", 8)
         assert head == "a b c d "
         assert rest == "e f g h i"
 
     def test_concatenation_recovers_original(self):
         original = "the quick brown fox jumps over the lazy dog"
-        rest, head = split_at_chars(original, 20)
+        head, rest = split_at_chars(original, 20)
         assert head + rest == original
 
     def test_head_fits_within_max_chars(self):
-        rest, head = split_at_chars("the quick brown fox jumps", 20)
-        del rest
+        head, _rest = split_at_chars("the quick brown fox jumps", 20)
         assert count_chars(head) <= 20
 
     def test_raises_when_no_breakpoint_available(self):

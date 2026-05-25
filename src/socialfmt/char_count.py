@@ -25,7 +25,12 @@ def count_chars(text: str) -> int:
 
 
 def split_at_chars(text: str, max_chars: int) -> tuple[str, str]:
-    """Find the highest character index that splits the text at or before max_chars."""
+    """Split text afterw the highest word/punctuation break at or before max_chars.
+
+    Returns ``(head, rest)`` where ``head`` is the chunk up to and including the
+    split character (``count_chars(head) <= max_chars``) and ``rest`` is
+    everything after it.
+    """
 
     def _maybe_valid_split(i: int) -> bool:
         """Check if the split at index i fits without checking utf16_endoded len."""
@@ -35,10 +40,10 @@ def split_at_chars(text: str, max_chars: int) -> tuple[str, str]:
         """Verify the split at index i fits by checking the utf16_encoded len."""
         return count_chars(text[:i]) <= max_chars
 
-    split_idxs = (x.span()[0] for x in re_splitable.finditer(text[:max_chars]))
+    split_idxs = (x.span()[1] for x in re_splitable.finditer(text[:max_chars]))
     split_idxs_tw = it.takewhile(_maybe_valid_split, split_idxs)
     split_idx = next(filter(_is_valid_split, reversed(list(split_idxs_tw))), None)
     if split_idx is None:
         msg = f"Cannot split at or before {max_chars} characters: {text[:max_chars]!r}"
         raise ValueError(msg)
-    return text[split_idx + 1 :], text[: split_idx + 1]
+    return text[:split_idx], text[split_idx:]

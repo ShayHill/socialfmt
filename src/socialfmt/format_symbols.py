@@ -15,14 +15,14 @@ _EM_DASH = "—"
 
 # Fenced code blocks (``` ... ```) and inline code spans (` ... ` or ``...``).
 # Inline spans are delimited by a run of backticks closed by an equal-length run.
-_CODE_RE = re.compile(r"```.*?```|(`+)(?:(?!\1).)+?\1", re.DOTALL)
+CODE_RE = re.compile(r"```.*?```|(`+)(?:(?!\1).)+?\1", re.DOTALL)
 
 
 def _apply_outside_code(text: str, transform: Callable[[str], str]) -> str:
     """Apply transform to segments of text that are not inside code blocks."""
     parts: list[str] = []
     last_end = 0
-    for match in _CODE_RE.finditer(text):
+    for match in CODE_RE.finditer(text):
         parts.append(transform(text[last_end : match.start()]))
         parts.append(match.group(0))
         last_end = match.end()
