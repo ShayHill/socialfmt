@@ -99,3 +99,8 @@ class TestSmartTextPostProcessing:
     def test_triple_dot_becomes_ellipsis(self):
         result = reformat_markdown_for_x("wait...")
         assert "…" in result
+
+class TestNewlinesPreserved:
+    """Treat single newlines as hard breaks, not spaces."""
+    result = reformat_markdown_for_x("color red\ncolor green\ncolor blue")
+    assert result == "color red\ncolor green\ncolor blue"

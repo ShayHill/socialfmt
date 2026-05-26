@@ -36,7 +36,7 @@ _TERMINATORS: list[list[str] | str] = [
 ]
 
 
-def _split_at_next_word(text: str, start: int) -> tuple[str, str]:
+def split_at_next_word(text: str, start: int) -> tuple[str, str]:
     """Find the next space in the text starting at the given index.
 
     :param text: The text to split
@@ -73,13 +73,13 @@ def _break_text(text: str) -> tuple[str, str]:
     splits = [_rfind_terminator(text, x) for x in _TERMINATORS]
     splits = [x for x in splits if x > -1]
     for split in splits:
-        part_a, part_b = _split_at_next_word(text, split)
+        part_a, part_b = split_at_next_word(text, split)
         if len(part_b) < len(part_a):
             return part_a, part_b
     if splits:
         # A long word or some other condition prevents part_a from ever being longer
         # than part_b. This is a better choice than splitting a word.
-        return _split_at_next_word(text, max(splits))
+        return split_at_next_word(text, max(splits))
     msg = f"No word boundary found in '{text}'"
     raise ValueError(msg)
 

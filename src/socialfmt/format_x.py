@@ -107,6 +107,8 @@ def _reformat_ast_to_unicode_styles(
         yield from _reformat_ast_to_unicode_styles(child, nested_formats)
     if name == "List":
         yield "\n"
+    elif name == "LineBreak":
+        yield "\n"
     elif name == "Paragraph":
         yield "\n"
         if "ListItem" not in style:
@@ -119,3 +121,4 @@ def reformat_markdown_for_x(text: str) -> str:
     document = MistletoeDocument(text)
     md_formatted = "".join(_reformat_ast_to_unicode_styles(document)).strip()
     return smart_text(dumb_text(md_formatted))
+
