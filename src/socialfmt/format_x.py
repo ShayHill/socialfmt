@@ -121,4 +121,3 @@ def reformat_markdown_for_x(text: str) -> str:
     document = MistletoeDocument(text)
     md_formatted = "".join(_reformat_ast_to_unicode_styles(document)).strip()
     return smart_text(dumb_text(md_formatted))
-

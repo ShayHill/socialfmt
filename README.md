@@ -29,4 +29,3 @@ X (Twitter), Discord, LinkedIn, and similar platforms accept plain Unicode but n
 ### `socialfmt.thread_break_text`
 
 - `break_into_thread(text, max_chars, footer_template="\n\n{}/{}", *, par_break_dots=False)` — Split a long string into a list of posts, each at most `max_chars` including the page footer. Breaks preferentially at paragraph, then sentence, then comma, then word boundaries. Returns the original string unchanged if it already fits.
-
