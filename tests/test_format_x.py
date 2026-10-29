@@ -4,10 +4,12 @@
 :created: 2026-05-24
 """
 
+from pathlib import Path
+
 import pytest
 
 from socialfmt import maps
-from socialfmt.format_x import reformat_markdown_for_x
+from socialfmt.format_x import main, reformat_markdown_for_x
 
 
 class TestRejectSpoilerTags:
@@ -72,13 +74,19 @@ class TestBlockquote:
         assert reformat_markdown_for_x("> hello") == maps.to_italic("hello")
 
     def test_bold_inside_blockquote_is_bold_italic(self):
-        assert (
-            reformat_markdown_for_x("> **hello**") == maps.to_bold_italic("hello")
-        )
+        assert reformat_markdown_for_x("> **hello**") == maps.to_bold_italic("hello")
 
 
-class TestSmartTextPostProcessing:
-    """The final output runs through dumb_text + smart_text."""
+class TestLists:
+    """Unordered lists render with bullet markers."""
+
+    @pytest.mark.parametrize("leader", ["*", "-"])
+    def test_unordered_list_markers(self, leader: str):
+        assert reformat_markdown_for_x(f"{leader} item") == "\u2022 item"
+
+
+class TestSmartTextFormatting:
+    """Non-code text runs through dumb_text + smart_text."""
 
     def test_single_quotes_become_curly(self):
         result = reformat_markdown_for_x("She said 'hi'.")
@@ -100,7 +108,35 @@ class TestSmartTextPostProcessing:
         result = reformat_markdown_for_x("wait...")
         assert "…" in result
 
+
+class TestCodeSymbolsPreserved:
+    """Code punctuation is not converted to smart typography."""
+
+    def test_inline_code_symbols(self):
+        content = "'quoted' -- --- ..."
+        assert reformat_markdown_for_x(f"`{content}`") == maps.to_mono(content)
+
+    def test_fenced_code_symbols(self):
+        content = "quoted -- --- ..."
+        text = f"```\n{content}\n```"
+        assert reformat_markdown_for_x(text) == maps.to_mono(content)
+
+
 class TestNewlinesPreserved:
     """Treat single newlines as hard breaks, not spaces."""
+
     result = reformat_markdown_for_x("color red\ncolor green\ncolor blue")
     assert result == "color red\ncolor green\ncolor blue"
+
+
+def test_main_writes_x_suffixed_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The script writes reformatted text beside its input file."""
+    input_path = tmp_path / "post.md"
+    _ = input_path.write_text("**hello**", encoding="utf-8")
+    monkeypatch.setattr("sys.argv", ["format_x", str(input_path)])
+
+    main()
+
+    assert (tmp_path / "post_x.md").read_text(encoding="utf-8") == maps.to_bold("hello")

@@ -7,36 +7,25 @@
 :created: 2026-05-22
 """
 
+import argparse
 from collections.abc import Callable, Iterator
+from pathlib import Path
 from typing import cast
 
 from mistletoe.block_token import Document as MistletoeDocument
 from mistletoe.token import Token
 
 from socialfmt import maps
-from socialfmt.format_symbols import CODE_RE, dumb_text, smart_text
-
-
-def _reject_spoiler_tags(text: str) -> None:
-    """Raise ``ValueError`` if ``||`` appears outside a code block."""
-    last_end = 0
-    for match in CODE_RE.finditer(text):
-        if "||" in text[last_end : match.start()]:
-            break
-        last_end = match.end()
-    else:
-        if "||" not in text[last_end:]:
-            return
-    msg = "spoiler tags (||...||) are not supported on X"
-    raise ValueError(msg)
-
-
-# These node names will never contribute to span styles.
-_IGNORE_FOR_SPAN_STYLES = {"Document", "Paragraph", "RawText"}
+from socialfmt.format_symbols import smart_text
 
 
 def _no_fmt(text: str) -> str:
     return text
+
+
+# These node names will never contribute to span styles.
+_IGNORE_FOR_SPAN_STYLES = {"Document", "Paragraph", "RawText"}
+_BULLET = "\u2022"
 
 
 _FMT2FORMATTER: dict[str | tuple[str, ...], Callable[[str], str]] = {
@@ -96,18 +85,17 @@ def _reformat_ast_to_unicode_styles(
     """Yield reformatted text given the ast root node."""
     name = node.__class__.__name__
     if name == "ListItem":
-        leader = cast("str", getattr(node, "leader", ""))
-        yield "• " if leader == "*" else f"{leader} "
+        yield f"{_BULLET} "
     style = _get_nested_styles(node)
     if name == "RawText":
         content = cast("str", getattr(node, "content", None))
+        if "InlineCode" not in style and "CodeFence" not in style:
+            content = smart_text(content)
         formatter = _find_formatter(style)
         yield formatter(content)
     for child in cast("list[Token] | None", getattr(node, "children", None)) or []:
         yield from _reformat_ast_to_unicode_styles(child, nested_formats)
-    if name == "List":
-        yield "\n"
-    elif name == "LineBreak":
+    if name in {"List", "LineBreak"}:
         yield "\n"
     elif name == "Paragraph":
         yield "\n"
@@ -117,7 +105,23 @@ def _reformat_ast_to_unicode_styles(
 
 def reformat_markdown_for_x(text: str) -> str:
     """Emulate markdown formatting with unicode characters."""
-    _reject_spoiler_tags(text)
     document = MistletoeDocument(text)
-    md_formatted = "".join(_reformat_ast_to_unicode_styles(document)).strip()
-    return smart_text(dumb_text(md_formatted))
+    return "".join(_reformat_ast_to_unicode_styles(document)).strip()
+
+
+def main() -> None:
+    """Reformat a Markdown file for X and write a sibling ``*_x`` file."""
+    parser = argparse.ArgumentParser()
+    _ = parser.add_argument("input_path", type=Path)
+    args = parser.parse_args()
+
+    input_path = args.input_path
+    output_path = input_path.with_stem(f"{input_path.stem}_x")
+    output_path.write_text(
+        reformat_markdown_for_x(input_path.read_text(encoding="utf-8")),
+        encoding="utf-8",
+    )
+
+
+if __name__ == "__main__":
+    main()
