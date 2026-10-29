@@ -23,6 +23,12 @@ def reformat_markdown_for_linkedin_reply(
 ) -> list[str]: ...
 
 
+@overload
+def reformat_markdown_for_linkedin_reply(
+    body: str, *, allow_thread: bool
+) -> str | list[str]: ...
+
+
 def reformat_markdown_for_linkedin_reply(
     body: str, *, allow_thread: bool = False
 ) -> str | list[str]:

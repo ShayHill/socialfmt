@@ -11,7 +11,8 @@ from socialfmt.format_social import enforce_max_chars, format_file, reformat_mar
 _MAX_CHARS = 3000
 
 
-@overloaddef reformat_markdown_for_linkedin(
+@overload
+def reformat_markdown_for_linkedin(
     body: str, *, allow_thread: Literal[False]
 ) -> str: ...
 
@@ -20,6 +21,12 @@ _MAX_CHARS = 3000
 def reformat_markdown_for_linkedin(
     body: str, *, allow_thread: Literal[True]
 ) -> list[str]: ...
+
+
+@overload
+def reformat_markdown_for_linkedin(
+    body: str, *, allow_thread: bool
+) -> str | list[str]: ...
 
 
 def reformat_markdown_for_linkedin(

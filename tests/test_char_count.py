@@ -6,7 +6,12 @@
 
 import pytest
 
-from socialfmt.char_count import count_chars, split_at_chars
+from socialfmt.char_count import (
+    count_chars,
+    get_and_mark_one_url,
+    put_back_url,
+    split_at_chars,
+)
 
 
 class TestCountChars:
@@ -45,6 +50,31 @@ class TestCountChars:
 
     def test_newline(self):
         assert count_chars("a\nb") == 3
+
+
+class TestUrlMarking:
+    """Leading URLs use X's fixed-length character representation."""
+
+    def test_marks_leading_url_and_restores_it(self):
+        text = "https://example.com/a-long-path trailing text"
+
+        marked, url = get_and_mark_one_url(text)
+
+        assert count_chars(marked) == 37
+        assert put_back_url(marked, url) == text
+
+    def test_does_not_mark_a_nonleading_url(self):
+        text = "See https://example.com"
+
+        marked, url = get_and_mark_one_url(text)
+
+        assert (marked, url) == (text, None)
+
+    def test_rejects_inconsistent_marker_and_url(self):
+        with pytest.raises(ValueError, match="URL marker"):
+            _ = put_back_url("plain text", "https://example.com")
+        with pytest.raises(ValueError, match="URL marker"):
+            _ = put_back_url("_" * 23, None)
 
 
 class TestSplitAtChars:

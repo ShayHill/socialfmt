@@ -16,6 +16,25 @@ import string
 # This regex matches any whitespace or punctuation character, which are the only
 # characters we'll use as breakpoints for splitting text.
 re_splitable = re.compile(f"[{re.escape(string.whitespace + string.punctuation)}]")
+_URL_MARKER = "_" * 23
+
+
+def get_and_mark_one_url(text: str) -> tuple[str, str | None]:
+    """Replace a leading HTTP(S) URL with X's fixed-length URL marker."""
+    if text.startswith(("https://", "http://")):
+        url = text.split(maxsplit=1)[0]
+        return text.replace(url, _URL_MARKER, 1), url
+    return text, None
+
+
+def put_back_url(text: str, url: str | None) -> str:
+    """Restore a URL previously replaced by :func:`get_and_mark_one_url`."""
+    if url and text.startswith(_URL_MARKER):
+        return text.replace(_URL_MARKER, url, 1)
+    if url or text.startswith(_URL_MARKER):
+        msg = "URL marker not found in text or URL marked but no URL provided"
+        raise ValueError(msg)
+    return text
 
 
 def count_chars(text: str) -> int:

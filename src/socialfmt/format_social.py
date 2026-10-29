@@ -37,6 +37,7 @@ class _BodyFormatter(Protocol):
     @overload
     def __call__(self, body: str, *, allow_thread: Literal[True]) -> list[str]: ...
 
+    @overload
     def __call__(self, body: str, *, allow_thread: bool) -> str | list[str]: ...
 
 
@@ -141,10 +142,11 @@ def format_file(suffix: str, formatter: _BodyFormatter) -> None:
     _ = parser.add_argument("--allow_thread", action="store_true")
     args = parser.parse_args()
 
-    input_path = args.input_path
+    input_path = cast("Path", args.input_path)
+    allow_thread = cast("bool", args.allow_thread)
     output_path = input_path.with_stem(f"{input_path.stem}{suffix}")
     body = formatter(
-        input_path.read_text(encoding="utf-8"), allow_thread=args.allow_thread
+        input_path.read_text(encoding="utf-8"), allow_thread=allow_thread
     )
     if isinstance(body, list):
         body = _THREAD_SEPARATOR.join(body)

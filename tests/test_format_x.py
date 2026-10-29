@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from socialfmt import maps
-from socialfmt.format_x import cli, reformat_markdown_for_x, _MAX_CHARS
+from socialfmt.format_x import _MAX_CHARS, cli, reformat_markdown_for_x
 
 
 class TestRejectSpoilerTags:
@@ -138,6 +138,13 @@ def test_main_rejects_an_overlong_tweet() -> None:
     """Non-threaded output must fit X's character limit."""
     with pytest.raises(ValueError, match="tweet longer"):
         _ = reformat_markdown_for_x("word " * 100)
+
+
+def test_main_counts_a_leading_url_as_twenty_three_characters() -> None:
+    """X measures a leading URL by its shortened, fixed-length representation."""
+    url = "https://example.com/" + "a" * 300
+
+    assert reformat_markdown_for_x(url) == url
 
 
 def test_cli_writes_x_suffixed_file(
